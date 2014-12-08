@@ -16,7 +16,7 @@ def create_app():
         if k.startswith('DEBOT_'):
             try:
                 v = ast.literal_eval(v)
-            except ValueError:
+            except (ValueError, SyntaxError):
                 pass
             app.config[k[6:]] = v
 
