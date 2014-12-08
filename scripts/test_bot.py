@@ -21,4 +21,4 @@ resp = requests.post('%s://%s:%s' % (args.scheme, args.host, args.port), data={
     'text': args.text,
     'trigger_word': args.trigger
 })
-print json.loads(resp.content)
+print(json.loads(resp.content)['text'])

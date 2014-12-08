@@ -5,7 +5,7 @@ from urllib import quote
 import requests
 
 
-def calc(eq):
+def on_calc(eq):
     """
     `equation` - return the google calculator result
     """

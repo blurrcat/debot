@@ -5,7 +5,7 @@ from flask import current_app, g
 from debot.dispatcher import HookError
 
 
-def require_admin(f):
+def admin_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if not g.user in current_app.config['ADMINS']:
@@ -14,3 +14,4 @@ def require_admin(f):
         else:
             return f(*args, **kwargs)
     return wrapper
+

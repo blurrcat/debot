@@ -5,6 +5,7 @@ import os
 from flask import abort, Flask, request, g
 from debot import config
 from debot.dispatcher import Dispatcher, HookError
+from debot.git_plugins import GitPluginsManager
 
 
 def create_app():
@@ -21,7 +22,12 @@ def create_app():
 
     logging.config.dictConfig(app.config['LOGGING_CONFIG'])
 
-    dispatcher = Dispatcher(app)
+    plugins_dirs = []
+    if app.config.get('EXTRA_PLUGINS_GIT'):
+        git_plugins = GitPluginsManager(app)
+        plugins_dirs.append(git_plugins.plugins_dir)
+    dispatcher = Dispatcher(app, plugins_dirs=plugins_dirs)
+
     me = app.config.get("username", "debot")
 
     @app.before_request

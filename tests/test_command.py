@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from flask import json
-from debot.plugin_utils import require_admin
+from debot.plugin_utils import admin_required
 
 
 def test_command(app, slack_token, echo_command):
@@ -34,13 +34,13 @@ def test_command(app, slack_token, echo_command):
         })
         assert resp.status_code == 200
         resp = json.loads(resp.data)
-        assert echo_command.__doc__ in resp['text']
+        assert 'what to echo' in resp['text']
 
 
 def test_admin(app, slack_token, echo_command, dispatcher):
     admin = 'admin'
     app.config['ADMINS'] = ('admin',)
-    dispatcher.hooks[echo_command.__name__] = require_admin(echo_command)
+    dispatcher.hooks[echo_command.__name__] = admin_required(echo_command)
     what = 'hello'
     # admin can call
     with app.test_client() as c:

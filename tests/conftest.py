@@ -38,6 +38,6 @@ def echo_command(app, dispatcher):
         :param what: what to echo
         """
         return what
-    dispatcher._add_hook('test_plugins', 'echo', echo)
+    dispatcher.add_hook('test_plugins', 'echo', echo)
     dispatcher._gen_help()
     return echo
