@@ -30,13 +30,10 @@ def create_app():
 
     me = app.config.get("username", "debot")
 
-    @app.before_request
-    def token_check():
-        if request.form.get('token') != app.config['SLACK_TOKEN']:
-            abort(403)
-
     @app.route("/", methods=['POST'])
     def index():
+        if request.form.get('token') != app.config['SLACK_TOKEN']:
+            abort(403)
         g.user = request.form.get('user_name', '').strip()
         message = request.form.get('text', '')
         # ignore message we sent
@@ -66,7 +63,7 @@ def create_app():
                 'color': color
             })
 
-    @app.route('_health')
+    @app.route('/_health')
     def health():
         return 'ok'
 
