@@ -66,6 +66,10 @@ def create_app():
                 'color': color
             })
 
+    @app.route('_health')
+    def health():
+        return 'ok'
+
     return app
 
 if __name__ == "__main__":

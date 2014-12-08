@@ -35,6 +35,14 @@ debot.dispatcher module
     :undoc-members:
     :show-inheritance:
 
+debot.git_plugins module
+------------------------
+
+.. automodule:: debot.git_plugins
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 debot.plugin_utils module
 -------------------------
 
