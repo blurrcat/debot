@@ -1,9 +1,10 @@
 import ast
+import logging.config
 import json
 import os
-from flask import Flask, request
+from flask import abort, Flask, request, g
 from debot import config
-from debot.dispatcher import Dispatcher
+from debot.dispatcher import Dispatcher, HookError
 
 
 def create_app():
@@ -18,39 +19,47 @@ def create_app():
                 pass
             app.config[k[6:]] = v
 
+    for k in app.config['REQUIRED_CONFIG']:
+        if k not in app.config:
+            raise RuntimeError('Required config "%s" not set' % k)
+
+    logging.config.dictConfig(app.config['LOGGING_CONFIG'])
+
     dispatcher = Dispatcher(app)
+    me = app.config.get("username", "debot")
+
+    @app.before_request
+    def token_check():
+        if request.form.get('token') != app.config['SLACK_TOKEN']:
+            abort(403)
 
     @app.route("/", methods=['POST'])
     def index():
-        me = app.config.get("username", "slask")
-        icon = app.config.get("icon", ":poop:")
-
-        # ignore message we sent; the outgoing webhook should only POST when
-        # message is prefixed: "!command *args"
-        from_user = request.form.get("user_name", "").strip()
-        message = request.form.get('message', '')
-        if from_user == me or from_user.lower() == "slackbot":
+        g.user = request.form.get('user_name', '').strip()
+        message = request.form.get('text', '')
+        # ignore message we sent
+        if g.user == me or g.user.lower() == "slackbot":
             return ""
+        trigger_word = request.form.get('trigger_word', '')
+        if trigger_word:
+            message = message.lstrip(trigger_word)
         parts = message.split()
-        if message.startswith(app.config['DEBOT_COMMAND_KEYWORD']):
-            command = parts[1]
-            args = parts[2:]
-        elif message.startswith(app.config['DEBOT_COMMAND_PREFIX']):
-            command = parts[0].lstrip(app.config['DEBOT_COMMAND_PREFIX'])
-            args = parts[1:]
-        else:
-            return ""
-
-        resp = dispatcher.dispatch(command, args)
+        try:
+            resp = dispatcher.dispatch(parts[0], parts[1:])
+            color = 'good'
+        except HookError as e:
+            resp = e.message
+            color = 'danger'
         if not resp:
             return ""
+        else:
+            return json.dumps({
+                'text': resp,
+                'parse': 'full',
+                'color': color
+            })
 
-        return json.dumps({
-            "text": resp,
-            "username": me,
-            "icon_emoji": icon,
-            "parse": "full",
-        })
+    return app
 
 if __name__ == "__main__":
     create_app().run(debug=True)
