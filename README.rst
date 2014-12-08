@@ -1,6 +1,7 @@
 debot
 =====
 
-[![Build Status](https://travis-ci.org/tryagainconcepts/api.svg?branch=master)](https://travis-ci.org/tryagainconcepts/api)
+.. image:: https://travis-ci.org/blurrcat/debot.svg?branch=master
+    :target: https://travis-ci.org/blurrcat/debot
 
 A bot based on Slack webhooks
