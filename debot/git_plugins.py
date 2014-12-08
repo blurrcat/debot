@@ -11,7 +11,7 @@ class GitPluginsManager(object):
     basedir = '/tmp'
 
     def __init__(self, app=None):
-        if not sarge.get_both('command -v git'):
+        if not sarge.get_both('which git'):
             raise RuntimeError('git not available')
         self._repo = None
         self._name = None
