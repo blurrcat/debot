@@ -1,9 +1,9 @@
 DEBUG = False
-DEBOT_MOTO = u'A very helpful bot. "I know, it\'s 42."'
-DEBOT_ADMINS = (u'blurrcat', u'sha')
+MOTO = u'A very helpful bot. "I know, it\'s 42."'
+ADMINS = (u'blurrcat', u'sha')
 SLACK_USERNAME = u'debot'
 SLACK_ICON = u':poop:'
-REQUIRED_CONFIG = (u'SLACK_TOKEN',)
+SLACK_TOKEN = u'slack_token'
 LOGGING_CONFIG = {
     'version': 1,
     'disable_existing_loggers': False,

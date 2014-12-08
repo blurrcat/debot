@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from setuptools import setup
+from setuptools import setup, find_packages
 
 __version__ = '0.1.0'
 readme = open('README.rst').read()
@@ -26,8 +26,9 @@ setup(
     author='Harry Liang',
     author_email='blurrcat@gmail.com',
     url='https://github.com/blurrcat/debot.git',
-    packages=[
-        'debot',
+    packages=find_packages(),
+    scripts=[
+        'scripts/test_bot.py',
     ],
     package_dir={'debot': 'debot'},
     install_requires=install_requires,

@@ -30,7 +30,7 @@ class Dispatcher(object):
         self._load_plugins(plugin_dir)
         self._load_plugins(app.config.get('DEBOT_PLUGINS_DIR', ''))
         self.admins = app.config.get('')
-        self._gen_help(app.config['DEBOT_MOTO'])
+        self._gen_help(app.config.get('MOTO', ''))
         app.extensions['dispatcher'] = self
 
     def _add_hook(self, modname, command, func):
@@ -77,7 +77,7 @@ class Dispatcher(object):
 
     def _gen_help(self, moto=None):
         docs = [moto] if moto else []
-        docs.extend('!%s %s' % (command, doc)
+        docs.extend('*%s*: %s' % (command, doc)
                     for command, doc in self.summaries.iteritems())
         self.help_all = '\n'.join(docs)
 
@@ -90,13 +90,16 @@ class Dispatcher(object):
         else:
             return self.help_all
 
-    def dispatch(self, command, args):
+    def dispatch(self, command, args=None):
         try:
             hook = self.hooks[command]
         except KeyError:
             return 'No such command: %s' % command
         try:
-            return hook(*args)
+            if args:
+                return hook(args)
+            else:
+                return hook()
         except Exception as e:
             self.logger.exception('error running command %s', command)
             raise HookError('Error running command %s: %s' % (command, e))

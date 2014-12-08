@@ -19,10 +19,6 @@ def create_app():
                 pass
             app.config[k[6:]] = v
 
-    for k in app.config['REQUIRED_CONFIG']:
-        if k not in app.config:
-            raise RuntimeError('Required config "%s" not set' % k)
-
     logging.config.dictConfig(app.config['LOGGING_CONFIG'])
 
     dispatcher = Dispatcher(app)
@@ -43,9 +39,14 @@ def create_app():
         trigger_word = request.form.get('trigger_word', '')
         if trigger_word:
             message = message.lstrip(trigger_word)
-        parts = message.split()
+        message = message.strip()
+        parts = message.split(' ', 1)
+        if len(parts) == 2:
+            args = parts[1]
+        else:
+            args = None
         try:
-            resp = dispatcher.dispatch(parts[0], parts[1:])
+            resp = dispatcher.dispatch(parts[0], args)
             color = 'good'
         except HookError as e:
             resp = e.message

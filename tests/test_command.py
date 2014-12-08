@@ -38,9 +38,9 @@ def test_command(app, slack_token, echo_command):
 
 
 def test_admin(app, slack_token, echo_command, dispatcher):
-    dispatcher.hooks[echo_command.__name__] = require_admin(echo_command)
     admin = 'admin'
-    app.config['DEBOT_ADMINS'] = ('admin',)
+    app.config['ADMINS'] = ('admin',)
+    dispatcher.hooks[echo_command.__name__] = require_admin(echo_command)
     what = 'hello'
     # admin can call
     with app.test_client() as c:
