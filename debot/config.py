@@ -1,0 +1,6 @@
+DEBUG = False
+DEBOT_COMMAND_KEYWORD = '!debot'
+DEBOT_COMMAND_PREFIX = '!'
+SLACK_USERNAME = 'debot'
+SLACK_ICON = ':poop:'
+SLACK_ADMINS = 'blurrcat,sha'
