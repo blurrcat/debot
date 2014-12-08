@@ -38,7 +38,7 @@ class GitPluginsManager(object):
             if os.path.exists(self._name):
                 os.chdir(self._name)
                 sarge.run('git pull')
-            else:
+            else:  # clone for the first time
                 sarge.run('git clone %s' % self._repo)
             return 'git plugins pulled from %s@%s: "%s"' % (
                 self._repo,
