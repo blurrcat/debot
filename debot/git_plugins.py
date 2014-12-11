@@ -5,6 +5,10 @@ Manage extra plugins via git
 """
 import os
 import sarge
+import sys
+
+
+pip_bin = '%s/bin/pip' % os.environ.get('VIRTUAL_ENV', sys.prefix)
 
 
 class GitPluginsManager(object):
@@ -58,7 +62,8 @@ class GitPluginsManager(object):
                     sarge.get_stdout('git log -1 --pretty=%B').strip('\n')
                 ))
             if os.path.exists('requirements.txt'):
-                pip = sarge.capture_both('pip install -r requirements.txt')
+                pip = sarge.capture_both(
+                    '%s install -r requirements.txt' % pip_bin)
                 if pip.returncode != 0:
                     resp.extend([
                         'sth went wrong when installing plugin requirements',
