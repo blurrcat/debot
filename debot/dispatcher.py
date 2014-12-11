@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from glob import glob
-import importlib
+import imp
 import os
 import re
 import sys
@@ -81,7 +81,12 @@ class Dispatcher(object):
             plugin = os.path.basename(plugin)
             modname = plugin[:-3]
             try:
-                mod = importlib.import_module(modname)
+                fp, pathname, desc = imp.find_module(modname, [plugin_dir])
+                try:
+                    mod = imp.load_module(modname, fp, pathname, desc)
+                finally:
+                    if fp:
+                        fp.close()
                 for command in re.findall(r"on_(\w+)", " ".join(dir(mod))):
                     hookfun = getattr(mod, "on_" + command)
                     command = self.add_hook(modname, command, hookfun, hooks)

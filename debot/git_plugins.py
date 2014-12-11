@@ -28,7 +28,7 @@ class GitPluginsManager(object):
         app.extensions['git_plugins_manager'] = self
         self.reload()
 
-    def reload(self):
+    def reload(self, branch='master'):
         """
         get or update plugins from git
         """
@@ -37,9 +37,10 @@ class GitPluginsManager(object):
         try:
             if os.path.exists(self._name):
                 os.chdir(self._name)
-                sarge.run('git pull')
+                sarge.run('git fetch origin')
             else:  # clone for the first time
                 sarge.run('git clone %s' % self._repo)
+            sarge.run('git checkout %s' % branch)
             return 'git plugins pulled from %s@%s: "%s"' % (
                 self._repo,
                 sarge.get_stdout('git rev-parse HEAD').strip('\n')[:8],
