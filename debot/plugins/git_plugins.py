@@ -5,7 +5,7 @@ from debot.plugin_utils import admin_required
 
 
 @admin_required
-def on_reload_plugins(branch):
+def on_reload_plugins(branch='master'):
     """
     `[branch]` - reload plugins in debot
     """
