@@ -36,6 +36,7 @@ def create_app():
             abort(403)
         g.user = request.form.get('user_name', '').strip()
         message = request.form.get('text', '')
+        app.logger.info('msg "%s" from user "%s"', message, g.user)
         # ignore message we sent
         if g.user == me or g.user.lower() == "slackbot":
             return ""

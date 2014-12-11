@@ -32,6 +32,7 @@ class GitPluginsManager(object):
         """
         get or update plugins from git
         """
+        resp = []
         old_cwd = os.getcwd()
         os.chdir(self.basedir)
         try:
@@ -39,21 +40,30 @@ class GitPluginsManager(object):
             if not os.path.exists(self._name):
                 sarge.run('git clone %s' % self._repo)
             os.chdir(self._name)
-            codes = sarge.run(
+            p = sarge.capture_both(
                 'git fetch origin && git checkout %s && git pull' % branch
-            ).returncodes
-            if os.path.exists('requirements.txt'):
-                codes.append(
-                    sarge.run('pip install -r requirements.txt').returncode)
-            for c in codes:
-                if c != 0:
-                    return 'sth went wrong when pulling plugins from %s' % (
-                        self._repo)
-            return 'git plugins pulled from %s@%s: "%s"' % (
-                self._repo,
-                sarge.get_stdout('git rev-parse HEAD').strip('\n')[:8],
-                sarge.get_stdout('git log -1 --pretty=%B').strip('\n')
             )
+            ok = True
+            for code in p.returncodes:
+                if code != 0:
+                    resp.extend([
+                        'sth went wrong when pulling plugins from %s:' % (
+                        self._repo), p.stdout.text, p.stderr.text])
+                    ok = False
+                    break
+            if ok:
+                resp.append('git plugins pulled from %s@%s: "%s"' % (
+                    self._repo,
+                    sarge.get_stdout('git rev-parse HEAD').strip('\n')[:8],
+                    sarge.get_stdout('git log -1 --pretty=%B').strip('\n')
+                ))
+            if os.path.exists('requirements.txt'):
+                pip = sarge.capture_both('pip install -r requirements.txt')
+                if pip.returncode != 0:
+                    resp.extend([
+                        'sth went wrong when installing plugin requirements',
+                        p.stdout.text, p.stderr.text])
+            return '\n'.join(resp)
         finally:
             os.chdir(old_cwd)
 
