@@ -35,12 +35,20 @@ class GitPluginsManager(object):
         old_cwd = os.getcwd()
         os.chdir(self.basedir)
         try:
-            if os.path.exists(self._name):
-                os.chdir(self._name)
-                sarge.run('git fetch origin')
-            else:  # clone for the first time
+            # clone for the first time
+            if not os.path.exists(self._name):
                 sarge.run('git clone %s' % self._repo)
-            sarge.run('git checkout %s' % branch)
+            os.chdir(self._name)
+            codes = sarge.run(
+                'git fetch origin && git checkout %s && git pull' % branch
+            ).returncodes
+            if os.path.exists('requirements.txt'):
+                codes.append(
+                    sarge.run('pip install -r requirements.txt').returncode)
+            for c in codes:
+                if c != 0:
+                    return 'sth went wrong when pulling plugins from %s' % (
+                        self._repo)
             return 'git plugins pulled from %s@%s: "%s"' % (
                 self._repo,
                 sarge.get_stdout('git rev-parse HEAD').strip('\n')[:8],
