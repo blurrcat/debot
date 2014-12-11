@@ -62,7 +62,7 @@ class GitPluginsManager(object):
                 if pip.returncode != 0:
                     resp.extend([
                         'sth went wrong when installing plugin requirements',
-                        p.stdout.text, p.stderr.text])
+                        pip.stdout.text, pip.stderr.text])
             return '\n'.join(resp)
         finally:
             os.chdir(old_cwd)
