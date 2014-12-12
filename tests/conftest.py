@@ -14,6 +14,7 @@ def slack_token():
 @pytest.fixture
 def app(request, slack_token):
     os.environ['DEBOT_SLACK_TOKEN'] = slack_token
+    os.environ['DEBOT_DEBUG'] = 'True'
     _app = create_app()
     context = _app.app_context()
     context.push()

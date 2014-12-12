@@ -1,11 +1,14 @@
 DEBUG = False
 MOTO = u'A very helpful bot. "I know, it\'s 42."'
-ADMINS = (u'blurrcat', u'sha')
+ADMINS = tuple()
 SLACK_USERNAME = u'debot'
+SLACK_CHANNEL = u'#debot'
 SLACK_ICON = u':poop:'
 SLACK_TOKEN = u'slack_token'
-EXTRA_PLUGINS_GIT = ''
-EXTRA_PLUGINS_GIT_DIR = ''
+# SLACK_INCOMING_WEBHOOK = ''
+SLACK_RATE_LIMIT = 1
+# EXTRA_PLUGINS_GIT = ''
+# EXTRA_PLUGINS_GIT_DIR = ''
 LOGGING_CONFIG = {
     'version': 1,
     'disable_existing_loggers': False,

@@ -20,14 +20,13 @@ class Dispatcher(object):
         self.help_all = ''
         self.moto = ''
         self.admins = []
+        self.plugins_dirs = []
+        if app:
+            self.init_app(app, plugins_dirs)
+
+    def init_app(self, app, plugins_dirs=None):
         if plugins_dirs:
             self.plugins_dirs = plugins_dirs
-        else:
-            self.plugins_dirs = []
-        if app:
-            self.init_app(app)
-
-    def init_app(self, app):
         self.logger = app.logger
         try:
             self.plugins_dirs.append(app.config['EXTRA_PLUGINS_DIR'])
@@ -53,7 +52,7 @@ class Dispatcher(object):
         hooks = hooks if hooks is not None else self.hooks
         if command in hooks:
             command = '%s_%s' % (modname, command)
-        hooks[command] = func
+        hooks[command.lower()] = func
         if func.__doc__:
             doc = func.__doc__.strip('\n ')
             self.summaries[command] = doc.split('\n')[0]

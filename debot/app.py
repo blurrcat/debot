@@ -1,11 +1,13 @@
+from gevent import monkey
+monkey.patch_all()
 import ast
 import logging.config
 import json
 import os
 from flask import abort, Flask, request, g
 from debot import config
-from debot.dispatcher import Dispatcher, HookError
-from debot.git_plugins import GitPluginsManager
+from debot.dispatcher import HookError
+from debot.extensions import notifier, git_plugin_manager, dispatcher
 
 
 def create_app():
@@ -19,14 +21,24 @@ def create_app():
             except (ValueError, SyntaxError):
                 pass
             app.config[k[6:]] = v
-
+    # logging config
     logging.config.dictConfig(app.config['LOGGING_CONFIG'])
 
+    if not app.config['ADMINS']:
+        app.logger.warning(
+            'No admin configured; Plugins decorated with "admin_required" ' +
+            'can not be called')
+
+    # slack notifier
+    if app.config.get('SLACK_INCOMING_WEBHOOK'):
+        notifier.init_app(app)
+
+    # plugins
     plugins_dirs = []
     if app.config.get('EXTRA_PLUGINS_GIT'):
-        git_plugins = GitPluginsManager(app)
-        plugins_dirs.append(git_plugins.plugins_dir)
-    dispatcher = Dispatcher(app, plugins_dirs=plugins_dirs)
+        git_plugin_manager.init_app(app)
+        plugins_dirs.append(git_plugin_manager.plugins_dir)
+    dispatcher.init_app(app, plugins_dirs=plugins_dirs)
 
     me = app.config.get("username", "debot")
 
@@ -35,6 +47,7 @@ def create_app():
         if request.form.get('token') != app.config['SLACK_TOKEN']:
             abort(403)
         g.user = request.form.get('user_name', '').strip()
+        g.channel = '#%s' % request.form.get('channel_name', '').strip()
         message = request.form.get('text', '')
         app.logger.info('msg "%s" from user "%s"', message, g.user)
         # ignore message we sent
@@ -45,12 +58,12 @@ def create_app():
             message = message.lstrip(trigger_word)
         message = message.strip()
         parts = message.split(' ', 1)
-        if len(parts) == 2:
+        try:
             args = parts[1]
-        else:
+        except IndexError:
             args = None
         try:
-            resp = dispatcher.dispatch(parts[0], args)
+            resp = dispatcher.dispatch(parts[0].lower(), args)
             color = 'good'
         except HookError as e:
             resp = e.message
