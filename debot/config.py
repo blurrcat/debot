@@ -11,23 +11,24 @@ SLACK_RATE_LIMIT = 1
 # EXTRA_PLUGINS_GIT_DIR = ''
 LOGGING_CONFIG = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+            'format': '[%(name)s][%(asctime)s]%(levelname)s - %(message)s'
         },
     },
     'handlers': {
         'default': {
             'level': 'DEBUG' if DEBUG else 'INFO',
             'class': 'logging.StreamHandler',
+            'formatter': 'standard',
         },
     },
     'loggers': {
         '': {
             'handlers': ['default'],
             'level': 'DEBUG' if DEBUG else 'INFO',
-            'propagate': True
+            'propagate': False
         }
     }
 }

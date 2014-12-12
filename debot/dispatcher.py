@@ -51,7 +51,8 @@ class Dispatcher(object):
         # add mod name to avoid command name clashes
         hooks = hooks if hooks is not None else self.hooks
         if command in hooks:
-            command = '%s_%s' % (modname, command)
+            command = '%s-%s' % (modname, command)
+        command = command.replace('_', '-')
         hooks[command.lower()] = func
         if func.__doc__:
             doc = func.__doc__.strip('\n ')

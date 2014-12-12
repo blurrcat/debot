@@ -11,7 +11,7 @@ from debot.extensions import notifier, git_plugin_manager, dispatcher
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask('debot')
     app.config.from_object(config)
     # production config via env vars
     for k, v in os.environ.items():
