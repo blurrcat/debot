@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import os
 import pytest
-from random import random as sys_random
 from debot.app import create_app
 
 
