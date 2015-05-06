@@ -23,8 +23,15 @@ clean-pyc:
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
 
-config:
-	pip install -e .[develop]
+config: clean
+	pip install -r requirements.txt
+	pip install -e .
+
+config-test: config
+	pip install -r requirements-test.txt
+
+config-dev: config-test
+	pip install -r requirements-dev.txt
 
 lint:
 	pylint --rcfile=.pylint.rc debot tests
@@ -50,3 +57,6 @@ release: clean docs test
 sdist: clean docs test
 	python setup.py sdist
 	ls -l dist
+
+build: clean
+	docker build -t debot .

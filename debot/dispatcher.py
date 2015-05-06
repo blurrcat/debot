@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from datetime import datetime, timedelta
 from glob import glob
 import imp
 import os
 import re
 import sys
+from flask import g, current_app
 
 
 class HookError(Exception):
@@ -21,6 +23,8 @@ class Dispatcher(object):
         self.moto = ''
         self.admins = []
         self.plugins_dirs = []
+        self._maintain_to = datetime(year=1970, month=1, day=1)
+        self._maintain_by = None
         if app:
             self.init_app(app, plugins_dirs)
 
@@ -61,7 +65,10 @@ class Dispatcher(object):
         return command
 
     def load_hooks(self):
-        hooks = {'help': self._on_help}
+        hooks = {
+            'help': self._on_help,
+            'maintain': self._on_maintain,
+        }
         for directory in self.plugins_dirs:
             self.load_plugins(hooks, directory)
         self.hooks = hooks
@@ -114,7 +121,28 @@ class Dispatcher(object):
         else:
             return self.help_all
 
+    def _on_maintain(self, duration=3600):
+        if not g.user in current_app.config['ADMINS']:
+            raise HookError(
+                '%s is not allowed to call maintain' % g.user)
+        try:
+            duration = float(duration)
+        except ValueError:
+            return ('duration must be the number of seconds of the ' +
+                    'maintenance period; got "%s"' % duration)
+        self._maintain_to = datetime.now() + timedelta(seconds=duration)
+        self._maintain_by = g.user
+        return ("I'm now in maintenance mode and will automatically "
+                "be reset to normal at %s" % self._maintain_to.strftime(
+                '%Y-%m-%d %H:%M:%S'))
+
     def dispatch(self, command, args=None):
+        if command != 'maintain' and datetime.now() < self._maintain_to:
+            # in maintenance mode
+            return ("I'm currently under maintenance by %s and will be "
+                    "available at %s" % (
+                    self._maintain_by,
+                    self._maintain_to.strftime('%Y-%m-%d %H:%M:%S')))
         try:
             hook = self.hooks[command]
         except KeyError:
@@ -124,6 +152,6 @@ class Dispatcher(object):
                 return hook(args)
             else:
                 return hook()
-        except Exception as e:
+        except (Exception, SystemExit) as e:
             self.logger.exception('error running command %s', command)
             raise HookError('Error running command %s: %s' % (command, e))

@@ -22,7 +22,7 @@ def create_app():
                 pass
             app.config[k[6:]] = v
     # logging config
-    logging.config.dictConfig(app.config['LOGGING_CONFIG'])
+    # logging.config.dictConfig(app.config['LOGGING_CONFIG'])
 
     if not app.config['ADMINS']:
         app.logger.warning(
